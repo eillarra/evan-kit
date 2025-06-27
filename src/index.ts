@@ -1,5 +1,5 @@
 // Components
-export { default as SkeletonLoader } from './components/SkeletonLoader.vue';
+export { default as MarkedDiv } from './components/MarkedDiv.vue';
 
 // Composables
 export { useSearch } from './composables/useSearch';
@@ -8,6 +8,9 @@ export { useProgramTemplate } from './composables/useProgramTemplate';
 
 // Stores
 export { useEventStore, type EvanApiClient } from './stores/event';
+
+// Utils
+export { render } from './utils/markdown';
 
 // Types
 export type {
