@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useSearch } from '../../src/composables/useSearch';
+
+import { useSearch } from '@evan/composables/useSearch';
 
 describe('useSearch (Evan Library)', () => {
   const mockItems = [
@@ -15,7 +16,7 @@ describe('useSearch (Evan Library)', () => {
   it('should initialize with all items when no search query', () => {
     const search = useSearch(
       () => mockItems,
-      (item) => [item.title, item.description]
+      (item) => [item.title, item.description],
     );
 
     expect(search.filteredItems.value).toEqual(mockItems);
@@ -25,13 +26,13 @@ describe('useSearch (Evan Library)', () => {
   it('should filter items based on search query', async () => {
     const search = useSearch(
       () => mockItems,
-      (item) => [item.title, item.description]
+      (item) => [item.title, item.description],
     );
 
     search.searchQuery.value = 'vue';
 
     // Wait for debounced search
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     expect(search.filteredItems.value).toHaveLength(1);
     expect(search.filteredItems.value[0].title).toBe('Vue.js Conference');
@@ -40,12 +41,12 @@ describe('useSearch (Evan Library)', () => {
   it('should handle multi-term search', async () => {
     const search = useSearch(
       () => mockItems,
-      (item) => [item.title, item.description]
+      (item) => [item.title, item.description],
     );
 
     search.searchQuery.value = 'javascript framework';
 
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     expect(search.filteredItems.value).toHaveLength(1);
     expect(search.filteredItems.value[0].title).toBe('React Summit');
@@ -55,7 +56,7 @@ describe('useSearch (Evan Library)', () => {
     const search = useSearch(
       () => mockItems,
       (item) => [item.title, item.description],
-      { minSearchLength: 3 }
+      { minSearchLength: 3 },
     );
 
     search.searchQuery.value = 'vu';
@@ -67,15 +68,16 @@ describe('useSearch (Evan Library)', () => {
   it('should clear search results', async () => {
     const search = useSearch(
       () => mockItems,
-      (item) => [item.title, item.description]
+      (item) => [item.title, item.description],
     );
 
     search.searchQuery.value = 'vue';
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     expect(search.filteredItems.value).toHaveLength(1);
 
     search.clearSearch();
+    await new Promise((resolve) => setTimeout(resolve, 10)); // Wait for reactive updates
 
     expect(search.searchQuery.value).toBe('');
     expect(search.filteredItems.value).toEqual(mockItems);
@@ -85,16 +87,16 @@ describe('useSearch (Evan Library)', () => {
     const search = useSearch(
       () => mockItems,
       (item) => [item.title, item.description],
-      { caseSensitive: true }
+      { caseSensitive: true },
     );
 
     search.searchQuery.value = 'VUE';
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     expect(search.filteredItems.value).toHaveLength(0);
 
     search.searchQuery.value = 'Vue';
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     expect(search.filteredItems.value).toHaveLength(1);
   });

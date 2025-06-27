@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue';
 import { useEventStore } from '../stores/event';
+import type { EvanPaper } from '../types';
 
 interface ProgramValidation {
   is_valid: boolean;
@@ -22,7 +23,7 @@ export function useProgramTemplate() {
   const isRendering = ref(false);
 
   function findPaper(paperId: number): PaperInfo | null {
-    const paper = eventStore.papers.find((p) => p.id === paperId);
+    const paper = eventStore.papers.find((p: EvanPaper) => p.id === paperId);
     if (!paper) return null;
 
     return {
@@ -30,14 +31,14 @@ export function useProgramTemplate() {
       title: paper.title,
       authors:
         paper.extra_data?.authors_str ||
-        paper.extra_data?.authors?.map((author) => author.name).join(', ') ||
+        paper.extra_data?.authors?.map((author: { name: string }) => author.name).join(', ') ||
         'Unknown authors',
       abstract: paper.abstract,
     };
   }
 
   function findPaperByInternalId(internalId: string): PaperInfo | null {
-    const paper = eventStore.papers.find((p) => {
+    const paper = eventStore.papers.find((p: EvanPaper) => {
       const extraData = p.extra_data;
       if (!extraData?.internal_id) return false;
 
@@ -59,7 +60,7 @@ export function useProgramTemplate() {
       title: paper.title,
       authors:
         paper.extra_data?.authors_str ||
-        paper.extra_data?.authors?.map((author) => author.name).join(', ') ||
+        paper.extra_data?.authors?.map((author: { name: string }) => author.name).join(', ') ||
         'Unknown authors',
       abstract: paper.abstract,
     };

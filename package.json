@@ -2,44 +2,9 @@
   "name": "evan-kit",
   "version": "0.1.0",
   "description": "Vue toolkit for Evan conference applications.",
+  "author": "Eneko Illarramendi <eneko.illarramendi@ugent.be>",
+  "license": "MIT",
   "type": "module",
-  "main": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./components/*": "./src/components/*",
-    "./composables/*": "./src/composables/*",
-    "./stores/*": "./src/stores/*",
-    "./types/*": "./src/types/*",
-    "./utils/*": "./src/utils/*"
-  },
-  "files": [
-    "src",
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint src --ext .ts,.vue",
-    "type-check": "vue-tsc --noEmit"
-  },
-  "peerDependencies": {
-    "vue": "^3.0.0",
-    "quasar": "^2.0.0",
-    "pinia": "^2.0.0",
-    "marked": "^13.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "@vue/eslint-config-typescript": "^13.0.0",
-    "eslint": "^8.0.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^1.0.0",
-    "vue-tsc": "^2.0.0"
-  },
   "keywords": [
     "vue",
     "vue3",
@@ -54,6 +19,77 @@
     "type": "git",
     "url": "https://github.com/eillarra/evan-kit.git"
   },
-  "license": "MIT",
-  "author": "Your Name"
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/types/index.d.ts",
+      "import": "./dist/types/types/index.js",
+      "default": "./dist/types/types/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.js",
+      "default": "./dist/components/*.js"
+    },
+    "./composables/*": {
+      "types": "./dist/composables/*.d.ts",
+      "import": "./dist/composables/*.js",
+      "default": "./dist/composables/*.js"
+    },
+    "./stores/*": {
+      "types": "./dist/stores/*.d.ts",
+      "import": "./dist/stores/*.js",
+      "default": "./dist/stores/*.js"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts",
+      "import": "./dist/types/*.js",
+      "default": "./dist/types/*.js"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.js",
+      "default": "./dist/utils/*.js"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts,.vue",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "date-fns": "^3.0.0",
+    "marked": "^13.0.0"
+  },
+  "peerDependencies": {
+    "pinia": "^2.0.0",
+    "quasar": "^2.0.0",
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/test-utils": "^2.4.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "happy-dom": "^12.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "vue": "^3.5.17",
+    "vue-tsc": "^2.0.0"
+  }
 }

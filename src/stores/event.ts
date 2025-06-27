@@ -1,13 +1,6 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import type {
-  EvanEvent,
-  EvanContent,
-  EvanSession,
-  EvanPaper,
-  EvanKeynote,
-  EvanVenue
-} from '../types';
+import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote, EvanVenue } from '../types';
 
 // API client interface that consuming applications must implement
 export interface EvanApiClient {
@@ -95,7 +88,7 @@ export const useEventStore = defineStore('evanEvent', () => {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanSession[] } | EvanSession[]>('sessions/');
       const data = response.data;
-      _sessions.value = Array.isArray(data) ? data : (data.results || []);
+      _sessions.value = Array.isArray(data) ? data : data.results || [];
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       console.error('Error loading sessions:', err);
@@ -110,7 +103,7 @@ export const useEventStore = defineStore('evanEvent', () => {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanPaper[] } | EvanPaper[]>('papers/');
       const data = response.data;
-      _papers.value = Array.isArray(data) ? data : (data.results || []);
+      _papers.value = Array.isArray(data) ? data : data.results || [];
     } catch (err) {
       console.error('Error loading papers:', err);
       _papers.value = [];
@@ -122,7 +115,7 @@ export const useEventStore = defineStore('evanEvent', () => {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanKeynote[] } | EvanKeynote[]>('keynotes/');
       const data = response.data;
-      _keynotes.value = Array.isArray(data) ? data : (data.results || []);
+      _keynotes.value = Array.isArray(data) ? data : data.results || [];
     } catch (err) {
       console.error('Error loading keynotes:', err);
       _keynotes.value = [];

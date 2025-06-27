@@ -8,13 +8,9 @@ export function useSearch<T>(
     debounceMs?: number;
     minSearchLength?: number;
     caseSensitive?: boolean;
-  } = {}
+  } = {},
 ) {
-  const {
-    debounceMs = 300,
-    minSearchLength = 2,
-    caseSensitive = false,
-  } = options;
+  const { debounceMs = 300, minSearchLength = 2, caseSensitive = false } = options;
 
   const searchQuery = ref('');
   const isSearching = ref(false);
@@ -37,14 +33,10 @@ export function useSearch<T>(
 
     const searchTerms = query.trim().split(/\s+/);
 
-    return items().filter(item => {
+    return items().filter((item) => {
       const fieldsToSearch = searchFields(item);
 
-      return searchTerms.every(term =>
-        fieldsToSearch.some(field =>
-          searchInText(term, field)
-        )
-      );
+      return searchTerms.every((term) => fieldsToSearch.some((field) => searchInText(term, field)));
     });
   };
 

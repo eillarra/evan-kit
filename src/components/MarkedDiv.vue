@@ -1,5 +1,5 @@
 <template>
-  <div v-if="text" v-html="html" class="evan__marked"></div>
+  <div v-if="hasContent" v-html="html" class="evan__marked"></div>
 </template>
 
 <script setup lang="ts">
@@ -8,8 +8,15 @@ import { computed } from 'vue';
 import { render } from '../utils/markdown';
 
 const props = defineProps<{
-  text: string;
+  text: string | null | undefined;
 }>();
 
-const html = computed<string>(() => render(props.text) as string);
+const hasContent = computed<boolean>(() => {
+  return props.text != null && props.text.trim().length > 0;
+});
+
+const html = computed<string>(() => {
+  if (!hasContent.value) return '';
+  return render(props.text as string) as string;
+});
 </script>

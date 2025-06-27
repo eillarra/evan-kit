@@ -1,65 +1,110 @@
 # evan-kit
 
-Vue 3 toolkit for Evan API conference applications
+[![github-tests-badge]][github-tests]
+[![license-badge]](LICENSE)
 
-## Features
-
-- 🧩 **Reusable Components** - SkeletonLoader and other UI components
-- 🔗 **Composables** - useSearch, usePerformanceMonitor, and more
-- 🏪 **Stores** - Pinia stores for event management
-- 📱 **Quasar Ready** - Built with Quasar framework compatibility
-- 🎯 **TypeScript** - Full TypeScript support
+Shared Vue 3 component library for Evan academic conference applications.
 
 ## Installation
 
+Add as a git submodule to your PWA project:
+
 ```bash
-npm install evan-kit
+git submodule add https://github.com/eillarra/evan-kit.git evan-kit
+git submodule update --init --recursive
+```
+
+### TypeScript configuration
+
+Add to your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@evan/*": ["./evan-kit/src/*"]
+    }
+  },
+  "include": ["evan-kit/src/types/global.d.ts"]
+}
+```
+
+### Vite configuration
+
+Add to your `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@evan': path.resolve(__dirname, './evan-kit/src'),
+    },
+  },
+});
 ```
 
 ## Usage
 
-```vue
-<script setup>
-import { SkeletonLoader } from 'evan-kit/components/SkeletonLoader.vue'
-import { useSearch } from 'evan-kit/composables/useSearch'
+### Global Types
 
-const { searchQuery, searchResults, isSearching } = useSearch()
+Types are automatically available without imports:
+
+```vue
+<script setup lang="ts">
+const event: EvanEvent = {};
+const session: EvanSession = {};
+</script>
+```
+
+### Components
+
+```vue
+<script setup lang="ts">
+import MarkedDiv from 'evan-kit/components/MarkedDiv.vue';
 </script>
 
 <template>
-  <SkeletonLoader v-if="isSearching" :count="6" />
+  <MarkedDiv :text="markdownContent" />
 </template>
 ```
 
-## Development
+### Utilities
 
-```bash
-# Install dependencies
-npm install
+```vue
+<script setup lang="ts">
+import { useSearch } from 'evan-kit/composables/useSearch';
+import { formatImportantDate } from 'evan-kit/utils/dates';
+import { toRomanNumeral } from 'evan-kit/utils/numbers';
 
-# Run tests
-npm test
-
-# Type check
-npm run type-check
-
-# Lint
-npm run lint
+const { searchQuery, searchResults } = useSearch();
+</script>
 ```
 
-## Components
+## Available exports
 
-- **SkeletonLoader** - Animated loading skeletons for cards
+### Components
 
-## Composables
+- `MarkedDiv` - Renders markdown safely
 
-- **useSearch** - Debounced search functionality
-- **usePerformanceMonitor** - Core Web Vitals monitoring
+### Composables
 
-## Stores
+- `useSearch` - Debounced search functionality
+- `useFavorites` - User favorites management
+- `usePersonalCalendar` - Calendar management
+- `useProgramTemplate` - Program helpers
+- `usePWAInstall` - PWA installation prompts
 
-- **event** - Event management with Pinia
+### Utils
 
-## License
+- **Dates**: `formatImportantDate`, `dateRange`, `passedImportantDate`
+- **Numbers**: `toRomanNumeral`, `formatDecimal`
+- **Markdown**: `render`
+- **Program**: Session and program management utilities
 
-MIT
+### Types
+
+Global types available: `EvanEvent`, `EvanSession`, `EvanSubsession`, `EvanPaper`, `EvanKeynote`, `EvanTrack`, `EvanVenue`, `EvanRoom`, `ImportantDate`
+
+[github-tests]: https://github.com/eillarra/evan-kit/actions/workflows/tests.yml
+[github-tests-badge]: https://github.com/eillarra/evan-kit/actions/workflows/tests.yml/badge.svg?branch=main
+[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
