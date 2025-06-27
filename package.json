@@ -1,0 +1,58 @@
+{
+  "name": "evan-kit",
+  "version": "0.1.0",
+  "description": "Vue toolkit for Evan conference applications.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./components/*": "./src/components/*",
+    "./composables/*": "./src/composables/*",
+    "./stores/*": "./src/stores/*",
+    "./types/*": "./src/types/*",
+    "./utils/*": "./src/utils/*"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts,.vue",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0",
+    "quasar": "^2.0.0",
+    "pinia": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "quasar",
+    "evan",
+    "conference",
+    "components",
+    "composables",
+    "toolkit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eillarra/evan-kit.git"
+  },
+  "license": "MIT",
+  "author": "Your Name"
+}
