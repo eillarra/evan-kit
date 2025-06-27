@@ -94,8 +94,8 @@ export const useEventStore = defineStore('evanEvent', () => {
     try {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanSession[] } | EvanSession[]>('sessions/');
-      const data = response.data as any;
-      _sessions.value = data.results || data;
+      const data = response.data;
+      _sessions.value = Array.isArray(data) ? data : (data.results || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       console.error('Error loading sessions:', err);
@@ -109,8 +109,8 @@ export const useEventStore = defineStore('evanEvent', () => {
     try {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanPaper[] } | EvanPaper[]>('papers/');
-      const data = response.data as any;
-      _papers.value = data.results || data;
+      const data = response.data;
+      _papers.value = Array.isArray(data) ? data : (data.results || []);
     } catch (err) {
       console.error('Error loading papers:', err);
       _papers.value = [];
@@ -121,8 +121,8 @@ export const useEventStore = defineStore('evanEvent', () => {
     try {
       const api = getApiClient();
       const response = await api.get<{ results?: EvanKeynote[] } | EvanKeynote[]>('keynotes/');
-      const data = response.data as any;
-      _keynotes.value = data.results || data;
+      const data = response.data;
+      _keynotes.value = Array.isArray(data) ? data : (data.results || []);
     } catch (err) {
       console.error('Error loading keynotes:', err);
       _keynotes.value = [];
