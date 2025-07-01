@@ -35,6 +35,7 @@ export {
   formatProgramTime,
   sortKeynotes,
   sortSessionsAdvanced,
+  getKeynoteAvatar,
   type TimeSlot,
   type SessionGroup,
 } from './utils/program';

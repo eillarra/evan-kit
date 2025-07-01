@@ -1,5 +1,14 @@
 import { toRomanNumeral } from './numbers';
-import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession } from '../types';
+import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession, EvanFile } from '../types';
+
+/**
+ * Extract avatar file from keynote files array
+ * @param keynote - The keynote object
+ * @returns The avatar file if found, undefined otherwise
+ */
+export function getKeynoteAvatar(keynote: EvanKeynote): EvanFile | undefined {
+  return keynote.files?.find((file) => file.tags?.includes('_internal:avatar'));
+}
 
 /**
  * Simple search utility function
