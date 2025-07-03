@@ -46,9 +46,9 @@ export const useEventStore = defineStore('evanEvent', () => {
     return event.value.venues?.find((venue) => venue.is_main);
   });
 
-  const sessions = computed(() => _sessions.value);
-  const papers = computed(() => _papers.value);
-  const keynotes = computed(() => _keynotes.value);
+  const sessions = computed(() => _sessions.value || []);
+  const papers = computed(() => _papers.value || []);
+  const keynotes = computed(() => _keynotes.value || []);
   const tracks = computed(() => _event.value?.tracks || []);
   const rooms = computed(() => {
     if (!_event.value?.venues) return [];
