@@ -135,7 +135,11 @@ export function usePersonalCalendar() {
     return `${entry.session.title} (${subsessionCount}/${totalSubsessions} slots)`;
   };
 
-  const groupCalendarEntriesByDay = (entries: CalendarSessionEntry[]): CalendarEntryGroup[] => {
+  const groupCalendarEntriesByDay = (
+    entries: CalendarSessionEntry[],
+    eventTimezone: string = 'Europe/Brussels',
+    isVirtualEvent: boolean = false,
+  ): CalendarEntryGroup[] => {
     const groups = new Map<string, CalendarSessionEntry[]>();
 
     entries.forEach((entry) => {
@@ -148,6 +152,9 @@ export function usePersonalCalendar() {
       groups.get(date)!.push(entry);
     });
 
+    // Use local timezone for virtual events, event timezone for in-person events
+    const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
     return Array.from(groups.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, entries]) => ({
@@ -156,6 +163,7 @@ export function usePersonalCalendar() {
           weekday: 'short',
           month: 'short',
           day: 'numeric',
+          timeZone,
         }),
         entries: entries.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
       }));

@@ -72,14 +72,38 @@ export function createTimeSlots(sessions: EvanSession[]): TimeSlot[] {
 /**
  * Group sessions by date
  * @param sessions - Array of sessions to group
+ * @param eventTimezone - The event timezone (optional, defaults to UTC behavior)
+ * @param isVirtualEvent - Whether the event is virtual (optional, defaults to false)
  * @returns Map of date strings to session arrays
  */
-export function getSessionsByDate(sessions: EvanSession[]): Map<string, EvanSession[]> {
+export function getSessionsByDate(
+  sessions: EvanSession[],
+  eventTimezone?: string,
+  isVirtualEvent?: boolean,
+): Map<string, EvanSession[]> {
   const byDate = new Map<string, EvanSession[]>();
 
   sessions.forEach((session) => {
     if (session.start_at) {
-      const dateKey = new Date(session.start_at).toISOString().split('T')[0];
+      let dateKey: string;
+
+      if (eventTimezone && !isVirtualEvent) {
+        // Use event timezone to determine the date
+        const sessionDate = new Date(session.start_at);
+        const timeZone = eventTimezone;
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+          // en-CA gives YYYY-MM-DD format
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          timeZone,
+        });
+        dateKey = formatter.format(sessionDate);
+      } else {
+        // Fallback to UTC behavior (original logic)
+        dateKey = new Date(session.start_at).toISOString().split('T')[0];
+      }
+
       if (!byDate.has(dateKey)) {
         byDate.set(dateKey, []);
       }
@@ -91,20 +115,17 @@ export function getSessionsByDate(sessions: EvanSession[]): Map<string, EvanSess
 }
 
 /**
- * Get available dates from sessions
- * @param sessions - Array of sessions
- * @returns Sorted array of date strings
- */
-export function getAvailableDates(sessions: EvanSession[]): string[] {
-  return Array.from(getSessionsByDate(sessions).keys()).sort();
-}
-
-/**
  * Group sessions by day with formatted date labels
  * @param sessions - Array of sessions to group
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
  * @returns Array of session groups sorted by date
  */
-export function groupSessionsByDay(sessions: EvanSession[]): SessionGroup[] {
+export function groupSessionsByDay(
+  sessions: EvanSession[],
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+): SessionGroup[] {
   const groups = new Map<string, EvanSession[]>();
   const undatedSessions: EvanSession[] = [];
 
@@ -121,6 +142,9 @@ export function groupSessionsByDay(sessions: EvanSession[]): SessionGroup[] {
     groups.get(date)?.push(session);
   });
 
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
   const result = Array.from(groups.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, sessions]) => ({
@@ -129,6 +153,7 @@ export function groupSessionsByDay(sessions: EvanSession[]): SessionGroup[] {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
+        timeZone,
       }),
       sessions: sessions.sort((a, b) => new Date(a.start_at || '').getTime() - new Date(b.start_at || '').getTime()),
     }));
@@ -213,17 +238,27 @@ export function filterSessions(
 /**
  * Create day options for filtering
  * @param availableDates - Array of available date strings
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
  * @returns Array of option objects with label and value
  */
-export function createDayOptions(availableDates: string[]) {
+export function createDayOptions(
+  availableDates: string[],
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+) {
   const options = [{ label: 'All Days', value: 'all' }];
 
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
   availableDates.forEach((date) => {
-    const dateObj = new Date(date);
+    const dateObj = new Date(date + 'T00:00:00');
     const label = dateObj.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
+      timeZone,
     });
     options.push({ label, value: date });
   });
@@ -286,16 +321,27 @@ export function getSubsessionDisplayTitle(subsession: EvanSubsession, index: num
 }
 
 /**
- * Format a date string for display
+ * Format a date string for display with appropriate timezone
+ * For virtual events, uses local timezone; for in-person events, uses event timezone
  * @param dateString - The date string to format
  * @param format - 'long' for full format, 'short' for abbreviated format
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
  * @returns Formatted date string or empty string if invalid
  */
-export function formatProgramDate(dateString?: string | null, format: 'long' | 'short' = 'short'): string {
+export function formatProgramDate(
+  dateString?: string | null,
+  format: 'long' | 'short' = 'short',
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+): string {
   if (!dateString) return '';
 
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
+
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
 
   if (format === 'long') {
     return date.toLocaleDateString('en-US', {
@@ -303,6 +349,7 @@ export function formatProgramDate(dateString?: string | null, format: 'long' | '
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone,
     });
   }
 
@@ -310,24 +357,36 @@ export function formatProgramDate(dateString?: string | null, format: 'long' | '
     weekday: 'short',
     month: 'short',
     day: 'numeric',
+    timeZone,
   });
 }
 
 /**
- * Format a time string for display in 24-hour format
+ * Format a time string for display in 24-hour format with appropriate timezone
+ * For virtual events, uses local timezone; for in-person events, uses event timezone
  * @param timeString - The time string to format
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
  * @returns Formatted time string (HH:mm) or empty string if invalid
  */
-export function formatProgramTime(timeString?: string | null): string {
+export function formatProgramTime(
+  timeString?: string | null,
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+): string {
   if (!timeString) return '';
 
   const date = new Date(timeString);
   if (isNaN(date.getTime())) return '';
 
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
+    timeZone,
   });
 }
 
@@ -473,9 +532,16 @@ export function sortSessionsAdvanced(sessions: EvanSession[], tracks: EvanTrack[
  * Group sessions by day with advanced sorting (prioritizing Keynotes and handling ARES codes)
  * @param sessions - Array of sessions to group
  * @param tracks - Array of tracks for priority sorting
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
  * @returns Array of session groups sorted by date with advanced session sorting
  */
-export function groupSessionsByDayAdvanced(sessions: EvanSession[], tracks: EvanTrack[]): SessionGroup[] {
+export function groupSessionsByDayAdvanced(
+  sessions: EvanSession[],
+  tracks: EvanTrack[],
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+): SessionGroup[] {
   const groups = new Map<string, EvanSession[]>();
   const undatedSessions: EvanSession[] = [];
 
@@ -492,6 +558,9 @@ export function groupSessionsByDayAdvanced(sessions: EvanSession[], tracks: Evan
     groups.get(date)?.push(session);
   });
 
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
   const result = Array.from(groups.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, sessions]) => ({
@@ -500,6 +569,7 @@ export function groupSessionsByDayAdvanced(sessions: EvanSession[], tracks: Evan
         weekday: 'short',
         month: 'short',
         day: 'numeric',
+        timeZone,
       }),
       sessions: sortSessionsAdvanced(sessions, tracks),
     }));
@@ -514,4 +584,66 @@ export function groupSessionsByDayAdvanced(sessions: EvanSession[], tracks: Evan
   }
 
   return result;
+}
+
+/**
+ * Get available days from sessions (simple and timezone-aware)
+ * Uses the exact same timezone logic as formatProgramDate to ensure consistency
+ * @param sessions - Array of sessions
+ * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
+ * @param isVirtualEvent - Whether the event is virtual (defaults to false)
+ * @param format - Format for the day label: 'short' (Mon, Dec 9) or 'weekday-only' (Mon)
+ * @returns Array of day options with correct labels and date values
+ */
+export function getAvailableDays(
+  sessions: EvanSession[],
+  eventTimezone: string = 'Europe/Brussels',
+  isVirtualEvent: boolean = false,
+  format: 'short' | 'weekday-only' = 'short',
+) {
+  if (!sessions.length) return [];
+
+  const uniqueDays = new Map<string, { label: string; value: string; date: string }>();
+
+  sessions.forEach((session) => {
+    if (!session.start_at) return;
+
+    // Use the exact same formatting logic as session display for full format
+    // Or extract just the weekday for the shortest format
+    let dayLabel: string;
+    if (format === 'weekday-only') {
+      const date = new Date(session.start_at);
+      const timeZone = isVirtualEvent ? undefined : eventTimezone;
+      dayLabel = date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        timeZone,
+      });
+    } else {
+      dayLabel = formatProgramDate(session.start_at, 'short', eventTimezone, isVirtualEvent);
+    }
+    const dateOnly = new Date(session.start_at).toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Extract weekday for the value (lowercase)
+    const date = new Date(session.start_at);
+    const timeZone = isVirtualEvent ? undefined : eventTimezone;
+    const weekdayLong = date
+      .toLocaleDateString('en-US', {
+        weekday: 'long',
+        timeZone,
+      })
+      .toLowerCase();
+
+    if (dayLabel && !uniqueDays.has(dateOnly)) {
+      uniqueDays.set(dateOnly, {
+        label: dayLabel,
+        value: weekdayLong,
+        date: dateOnly,
+      });
+    }
+  });
+
+  // Sort by date
+  const sortedDays = Array.from(uniqueDays.values()).sort((a, b) => a.date.localeCompare(b.date));
+
+  return sortedDays;
 }

@@ -22,7 +22,7 @@ export { toRomanNumeral, formatDecimal } from './utils/numbers';
 export {
   createTimeSlots,
   getSessionsByDate,
-  getAvailableDates,
+  getAvailableDays,
   groupSessionsByDay,
   getTrackName,
   getRoomName,

@@ -7,7 +7,7 @@ describe('getKeynoteAvatar', () => {
     const mockAvatarFile: EvanFile = {
       id: 1,
       name: 'speaker-photo.jpg',
-      url: 'https://example.com/speaker-photo.jpg',
+      file: 'https://example.com/speaker-photo.jpg',
       size: 50000,
       tags: ['_internal:avatar'],
     };
@@ -15,7 +15,7 @@ describe('getKeynoteAvatar', () => {
     const mockOtherFile: EvanFile = {
       id: 2,
       name: 'presentation.pdf',
-      url: 'https://example.com/presentation.pdf',
+      file: 'https://example.com/presentation.pdf',
       size: 100000,
       tags: ['presentation'],
     };
@@ -43,7 +43,7 @@ describe('getKeynoteAvatar', () => {
     const mockFile: EvanFile = {
       id: 1,
       name: 'presentation.pdf',
-      url: 'https://example.com/presentation.pdf',
+      file: 'https://example.com/presentation.pdf',
       size: 100000,
       tags: ['presentation'],
     };
@@ -91,7 +91,7 @@ describe('getKeynoteAvatar', () => {
     const mockAvatarFile: EvanFile = {
       id: 1,
       name: 'speaker-photo.jpg',
-      url: 'https://example.com/speaker-photo.jpg',
+      file: 'https://example.com/speaker-photo.jpg',
       size: 50000,
       tags: ['_internal:avatar'],
     };
@@ -115,7 +115,7 @@ describe('getKeynoteAvatar', () => {
     // TypeScript should recognize this as EvanFile
     expect(result).toBeDefined();
     expect(result?.id).toBe(1);
-    expect(result?.url).toBe('https://example.com/speaker-photo.jpg');
+    expect(result?.file).toBe('https://example.com/speaker-photo.jpg');
     expect(result?.name).toBe('speaker-photo.jpg');
     expect(result?.size).toBe(50000);
     expect(result?.tags).toEqual(['_internal:avatar']);
