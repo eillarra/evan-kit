@@ -1,5 +1,6 @@
-import { useFavorites } from './useFavorites';
 import type { EvanSession, EvanSubsession } from '../types';
+
+import { useFavorites } from './useFavorites';
 
 export interface CalendarSessionEntry {
   id: string; // unique identifier for the card (session.id + index for splits)

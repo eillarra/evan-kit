@@ -1,6 +1,7 @@
+import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote, EvanVenue } from '../types';
+
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote, EvanVenue } from '../types';
 
 // API client interface that consuming applications must implement
 export interface EvanApiClient {

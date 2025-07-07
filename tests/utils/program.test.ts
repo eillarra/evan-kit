@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { getKeynoteAvatar } from '../../src/utils/program';
 import type { EvanKeynote, EvanFile } from '../../src/types';
+
+import { describe, it, expect } from 'vitest';
+
+import { getKeynoteAvatar } from '../../src/utils/program';
 
 describe('getKeynoteAvatar', () => {
   it('should return avatar file when _internal:avatar tag is present', () => {

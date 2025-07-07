@@ -1,6 +1,7 @@
+import type { ImportantDate } from '@evan/types';
+
 import { describe, it, expect } from 'vitest';
 
-import type { ImportantDate } from '@evan/types';
 import { dateRange, formatImportantDate, passedImportantDate } from '@evan/utils/dates';
 
 describe('dateRange', () => {

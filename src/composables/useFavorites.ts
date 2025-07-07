@@ -1,6 +1,7 @@
+import type { EvanSession, EvanSubsession } from '../types';
+
 import { ref, computed, watch } from 'vue';
 import { useEventStore } from '../stores/event';
-import type { EvanSession } from '../types';
 
 interface FavoritesStorage {
   sessions: number[];
@@ -110,7 +111,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
 
   const toggleSessionFavorite = (sessionId: number) => {
     const eventStore = useEventStore();
-    const session = eventStore.sessions.find((s) => s.id === sessionId);
+    const session = eventStore.sessions.find((s: EvanSession) => s.id === sessionId);
 
     if (!session) {
       console.warn(`Session ${sessionId} not found in event store`);
@@ -121,7 +122,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
       removeSessionFavorite(sessionId);
       // Remove all subsessions when removing session
       if (session.subsessions) {
-        session.subsessions.forEach((subsession) => {
+        session.subsessions.forEach((subsession: EvanSubsession) => {
           if (isSubsessionFavorited(subsession.id)) {
             removeSubsessionFavorite(subsession.id);
           }
@@ -131,7 +132,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
       addSessionFavorite(sessionId);
       // Add all subsessions when adding session
       if (session.subsessions) {
-        session.subsessions.forEach((subsession) => {
+        session.subsessions.forEach((subsession: EvanSubsession) => {
           if (!isSubsessionFavorited(subsession.id)) {
             addSubsessionFavorite(subsession.id);
           }
@@ -144,8 +145,8 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     const eventStore = useEventStore();
 
     // Find the session that contains this subsession
-    const parentSession = eventStore.sessions.find((session) =>
-      session.subsessions?.some((sub) => sub.id === subsessionId),
+    const parentSession = eventStore.sessions.find((session: EvanSession) =>
+      session.subsessions?.some((sub: EvanSubsession) => sub.id === subsessionId),
     );
 
     if (!parentSession) {
@@ -169,7 +170,9 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     // Sync parent session state
     if (!parentSession.subsessions) return;
 
-    const allSubsessionsFavorited = parentSession.subsessions.every((sub) => isSubsessionFavorited(sub.id));
+    const allSubsessionsFavorited = parentSession.subsessions.every((sub: EvanSubsession) =>
+      isSubsessionFavorited(sub.id),
+    );
 
     if (allSubsessionsFavorited && !isSessionFavorited(parentSession.id)) {
       // All subsessions are favorited, so favorite the session

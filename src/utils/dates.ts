@@ -1,5 +1,6 @@
-import { format } from 'date-fns';
 import type { ImportantDate } from '../types';
+
+import { format } from 'date-fns';
 
 function dateRange(startDate: string | Date, endDate: string | Date | null, includeYear: boolean = true): string {
   const start = new Date(startDate);

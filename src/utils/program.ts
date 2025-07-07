@@ -1,5 +1,6 @@
-import { toRomanNumeral } from './numbers';
 import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession, EvanFile } from '../types';
+
+import { toRomanNumeral } from './numbers';
 
 /**
  * Extract avatar file from keynote files array

@@ -1,6 +1,7 @@
+import type { EvanPaper } from '../types';
+
 import { ref, computed } from 'vue';
 import { useEventStore } from '../stores/event';
-import type { EvanPaper } from '../types';
 
 interface ProgramValidation {
   is_valid: boolean;
