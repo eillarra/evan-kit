@@ -49,6 +49,7 @@ export type {
   EvanPaper,
   EvanKeynote,
   EvanTrack,
+  EvanTopic,
   EvanVenue,
   EvanRoom,
   ImportantDate,

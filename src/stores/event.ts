@@ -51,6 +51,7 @@ export const useEventStore = defineStore('evanEvent', () => {
   const papers = computed(() => _papers.value || []);
   const keynotes = computed(() => _keynotes.value || []);
   const tracks = computed(() => _event.value?.tracks || []);
+  const topics = computed(() => _event.value?.topics || []);
   const rooms = computed(() => {
     if (!_event.value?.venues) return [];
     return _event.value.venues.flatMap((venue) => venue.rooms || []);
@@ -165,6 +166,7 @@ export const useEventStore = defineStore('evanEvent', () => {
     papers,
     keynotes,
     tracks,
+    topics,
     rooms,
     loading,
     error,

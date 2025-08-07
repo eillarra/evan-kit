@@ -198,6 +198,19 @@ export function getRoomName(rooms: EvanRoom[], roomId: number | null, fallback =
 }
 
 /**
+ * Get topic name by ID with fallback handling
+ * @param topics - Array of topics to search
+ * @param topicId - The topic ID to look up
+ * @param fallback - Custom fallback text (default: 'Unknown topic')
+ * @returns Topic name or fallback text
+ */
+export function getTopicName(topics: EvanTopic[], topicId: number | null, fallback = 'Unknown topic'): string {
+  if (!topicId) return fallback;
+  const topic = topics.find((t) => t.id === topicId);
+  return topic?.name || fallback;
+}
+
+/**
  * Filter sessions based on search criteria
  * @param sessions - Array of sessions to filter
  * @param searchQuery - Text to search for in title, description, or track

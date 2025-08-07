@@ -7,6 +7,7 @@ export type { EvanSubsession } from './subsessions';
 export type { EvanPaper } from './papers';
 export type { EvanKeynote } from './keynotes';
 export type { EvanTrack } from './tracks';
+export type { EvanTopic } from './topics';
 export type { EvanVenue, EvanVenueRoom } from './venues';
 export type { EvanRoom } from './rooms';
 export type { EvanFile } from './files';
