@@ -1,6 +1,7 @@
 import type { EvanSession, EvanSubsession } from '../types';
 
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import { LocalStorage } from 'quasar';
 import { useEventStore } from '../stores/event';
 
 interface FavoritesStorage {
@@ -9,21 +10,28 @@ interface FavoritesStorage {
   lastUpdated: number;
 }
 
-const favoriteSessionIds = ref<number[]>([]);
-const favoriteSubsessionIds = ref<number[]>([]);
-let isInitialized = false;
+// Global singleton state - shared across all instances (initialized immediately)
+const globalFavoriteSessionIds = ref<number[]>([]);
+const globalFavoriteSubsessionIds = ref<number[]>([]);
+let isGloballyInitialized = false;
+let currentStorageKey = '';
+let currentStorageVersion = 1;
 
 export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) {
+  // Use the global refs directly
+  const favoriteSessionIds = globalFavoriteSessionIds;
+  const favoriteSubsessionIds = globalFavoriteSubsessionIds;
+
+  // Update storage configuration
+  currentStorageKey = storageKey;
+  currentStorageVersion = storageVersion;
+
   // === Storage Management ===
   const loadFromStorage = (): FavoritesStorage | null => {
     try {
-      const stored = localStorage.getItem(storageKey);
-      if (!stored) return null;
-
-      const data = JSON.parse(stored);
-      if (data.version !== storageVersion) return null;
-
-      return data.favorites;
+      const stored = LocalStorage.getItem(currentStorageKey) as { version: number; favorites: FavoritesStorage } | null;
+      if (!stored || stored.version !== currentStorageVersion) return null;
+      return stored.favorites;
     } catch (error) {
       console.warn('Failed to load favorites from storage:', error);
       return null;
@@ -33,38 +41,40 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
   const saveToStorage = () => {
     try {
       const data = {
-        version: storageVersion,
+        version: currentStorageVersion,
         favorites: {
           sessions: favoriteSessionIds.value,
           subsessions: favoriteSubsessionIds.value,
           lastUpdated: Date.now(),
         },
       };
-      localStorage.setItem(storageKey, JSON.stringify(data));
+      LocalStorage.set(currentStorageKey, data);
 
       // Dispatch custom event for external listeners
-      window.dispatchEvent(
-        new CustomEvent('favoritesUpdated', {
-          detail: { sessionCount: favoriteSessionIds.value.length },
-        }),
-      );
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('favoritesUpdated', {
+            detail: { sessionCount: favoriteSessionIds.value.length },
+          }),
+        );
+      }
     } catch (error) {
       console.warn('Failed to save favorites to storage:', error);
     }
   };
 
   const initialize = () => {
-    if (isInitialized) return;
-
-    const stored = loadFromStorage();
-    if (stored) {
-      favoriteSessionIds.value = stored.sessions || [];
-      favoriteSubsessionIds.value = stored.subsessions || [];
+    // Only load from storage once globally
+    if (!isGloballyInitialized) {
+      const stored = loadFromStorage();
+      
+      if (stored) {
+        favoriteSessionIds.value = stored.sessions || [];
+        favoriteSubsessionIds.value = stored.subsessions || [];
+      }
+      
+      isGloballyInitialized = true;
     }
-
-    watch([favoriteSessionIds, favoriteSubsessionIds], saveToStorage, { deep: true });
-
-    isInitialized = true;
   };
 
   // === Query Functions ===
@@ -86,6 +96,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
   const addSessionFavorite = (sessionId: number) => {
     if (!isSessionFavorited(sessionId)) {
       favoriteSessionIds.value.push(sessionId);
+      saveToStorage(); // Save immediately
     }
   };
 
@@ -93,12 +104,14 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     const index = favoriteSessionIds.value.indexOf(sessionId);
     if (index > -1) {
       favoriteSessionIds.value.splice(index, 1);
+      saveToStorage(); // Save immediately
     }
   };
 
   const addSubsessionFavorite = (subsessionId: number) => {
     if (!isSubsessionFavorited(subsessionId)) {
       favoriteSubsessionIds.value.push(subsessionId);
+      saveToStorage(); // Save immediately
     }
   };
 
@@ -106,6 +119,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     const index = favoriteSubsessionIds.value.indexOf(subsessionId);
     if (index > -1) {
       favoriteSubsessionIds.value.splice(index, 1);
+      saveToStorage(); // Save immediately
     }
   };
 
@@ -116,9 +130,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     if (!session) {
       console.warn(`Session ${sessionId} not found in event store`);
       return;
-    }
-
-    if (isSessionFavorited(sessionId)) {
+    }    if (isSessionFavorited(sessionId)) {
       removeSessionFavorite(sessionId);
       // Remove all subsessions when removing session
       if (session.subsessions) {
@@ -179,7 +191,6 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
       addSessionFavorite(parentSession.id);
     } else if (!allSubsessionsFavorited && isSessionFavorited(parentSession.id)) {
       // Not all subsessions are favorited, so unfavorite the session
-      // This covers both "no subsessions favorited" and "some but not all favorited"
       removeSessionFavorite(parentSession.id);
     }
   };
@@ -187,6 +198,7 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
   const clearAllFavorites = () => {
     favoriteSessionIds.value = [];
     favoriteSubsessionIds.value = [];
+    saveToStorage(); // Save immediately
   };
 
   const getFavoriteSessionsWithData = (allSessions: EvanSession[]): EvanSession[] => {
