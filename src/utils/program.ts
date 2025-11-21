@@ -1,4 +1,4 @@
-import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession, EvanFile } from '../types';
+import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession, EvanFile, EvanTopic } from '../types';
 
 import { toRomanNumeral } from './numbers';
 

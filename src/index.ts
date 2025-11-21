@@ -13,7 +13,7 @@ export {
 } from './composables/usePersonalCalendar';
 
 // Stores
-export { useEventStore, type EvanApiClient } from './stores/event';
+export { useEventStore } from './stores/event';
 
 // Utils
 export { render } from './utils/markdown';

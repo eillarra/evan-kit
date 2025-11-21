@@ -1,11 +1,12 @@
 import MarkdownIt from 'markdown-it';
+import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 
 const md = new MarkdownIt();
 
 // Override the default link renderer to add target="_blank" to external links
-const defaultRender =
+const defaultRender: RenderRule =
   md.renderer.rules.link_open ||
-  function (tokens, idx, options, env, self) {
+  function (tokens, idx, options, _env, self) {
     return self.renderToken(tokens, idx, options);
   };
 
