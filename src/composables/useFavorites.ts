@@ -67,12 +67,12 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     // Only load from storage once globally
     if (!isGloballyInitialized) {
       const stored = loadFromStorage();
-      
+
       if (stored) {
         favoriteSessionIds.value = stored.sessions || [];
         favoriteSubsessionIds.value = stored.subsessions || [];
       }
-      
+
       isGloballyInitialized = true;
     }
   };
@@ -130,7 +130,8 @@ export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) 
     if (!session) {
       console.warn(`Session ${sessionId} not found in event store`);
       return;
-    }    if (isSessionFavorited(sessionId)) {
+    }
+    if (isSessionFavorited(sessionId)) {
       removeSessionFavorite(sessionId);
       // Remove all subsessions when removing session
       if (session.subsessions) {

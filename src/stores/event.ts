@@ -1,12 +1,8 @@
 import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote, EvanVenue } from '../types';
+import * as api from '../api/client';
 
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-
-// API client interface that consuming applications must implement
-export interface EvanApiClient {
-  get<T = unknown>(url: string): Promise<{ data: T }>;
-}
 
 export const useEventStore = defineStore('evanEvent', () => {
   const _event = ref<EvanEvent | undefined>(undefined);
@@ -18,9 +14,6 @@ export const useEventStore = defineStore('evanEvent', () => {
   const _error = ref<string | null>(null);
   const _programDataLoaded = ref(false);
   const _programDataLoading = ref(false);
-
-  // API client must be injected by consuming application
-  let _apiClient: EvanApiClient | null = null;
 
   const _loaded = computed(() => _event.value && _contents.value);
   const programDataLoaded = computed(() => _programDataLoaded.value);
@@ -59,38 +52,12 @@ export const useEventStore = defineStore('evanEvent', () => {
   const loading = computed(() => _loading.value);
   const error = computed(() => _error.value);
 
-  function setApiClient(apiClient: EvanApiClient) {
-    _apiClient = apiClient;
-  }
-
-  function getApiClient(): EvanApiClient {
-    if (!_apiClient) {
-      throw new Error('API client not initialized. Call setApiClient() first.');
-    }
-    return _apiClient;
-  }
-
-  async function fetchEvent() {
-    const api = getApiClient();
-    const response = await api.get<EvanEvent>('');
-    _event.value = response.data;
-  }
-
-  async function fetchContents() {
-    const api = getApiClient();
-    const response = await api.get<EvanContent[]>('contents/');
-    _contents.value = response.data;
-  }
-
   async function fetchSessions() {
     _loading.value = true;
     _error.value = null;
 
     try {
-      const api = getApiClient();
-      const response = await api.get<{ results?: EvanSession[] } | EvanSession[]>('sessions/');
-      const data = response.data;
-      _sessions.value = Array.isArray(data) ? data : data.results || [];
+      _sessions.value = await api.fetchSessions();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       console.error('Error loading sessions:', err);
@@ -102,10 +69,7 @@ export const useEventStore = defineStore('evanEvent', () => {
 
   async function fetchPapers() {
     try {
-      const api = getApiClient();
-      const response = await api.get<{ results?: EvanPaper[] } | EvanPaper[]>('papers/');
-      const data = response.data;
-      _papers.value = Array.isArray(data) ? data : data.results || [];
+      _papers.value = await api.fetchPapers();
     } catch (err) {
       console.error('Error loading papers:', err);
       _papers.value = [];
@@ -114,10 +78,7 @@ export const useEventStore = defineStore('evanEvent', () => {
 
   async function fetchKeynotes() {
     try {
-      const api = getApiClient();
-      const response = await api.get<{ results?: EvanKeynote[] } | EvanKeynote[]>('keynotes/');
-      const data = response.data;
-      _keynotes.value = Array.isArray(data) ? data : data.results || [];
+      _keynotes.value = await api.fetchKeynotes();
     } catch (err) {
       console.error('Error loading keynotes:', err);
       _keynotes.value = [];
@@ -137,16 +98,15 @@ export const useEventStore = defineStore('evanEvent', () => {
     }
   }
 
-  async function init() {
-    await fetchEvent();
-    await fetchContents();
+  async function init(eventCode: string) {
+    api.setEventCode(eventCode);
+    _event.value = await api.fetchEvent();
+    _contents.value = await api.fetchContents();
   }
 
   async function fetchSessionDetail(session: EvanSession): Promise<EvanSession> {
     try {
-      const api = getApiClient();
-      const response = await api.get<EvanSession>(session.self);
-      return response.data;
+      return await api.fetchSessionDetail(session.self);
     } catch (err) {
       console.error('Error loading session detail:', err);
       throw err;
@@ -154,7 +114,6 @@ export const useEventStore = defineStore('evanEvent', () => {
   }
 
   return {
-    setApiClient,
     init,
     _loaded,
     programDataLoaded,
