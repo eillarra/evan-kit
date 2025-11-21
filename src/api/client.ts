@@ -2,11 +2,12 @@ import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote } from
 
 const API_BASE = 'https://evan.ugent.be/api/v1';
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
     public statusText: string,
+    public data?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -15,7 +16,13 @@ class ApiError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new ApiError(`API request failed: ${response.statusText}`, response.status, response.statusText);
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = undefined;
+    }
+    throw new ApiError(`API request failed: ${response.statusText}`, response.status, response.statusText, data);
   }
   return response.json();
 }

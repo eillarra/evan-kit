@@ -7,15 +7,15 @@ export interface EvanKeynote {
   readonly code: string;
   readonly title: string;
   readonly speaker: string;
+  readonly bio: MarkdownText | EmptyString;
   readonly abstract: MarkdownText | EmptyString;
   readonly session: number | null;
   readonly subsession: number | null;
   readonly updated_at: string;
   readonly files: EvanFile[];
   readonly extra_data: {
-    speaker_bio?: string;
     speaker_affiliation?: string;
     speaker_website?: string;
-    [key: string]: unknown;
+    presentation_url?: string;
   };
 }
