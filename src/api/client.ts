@@ -1,6 +1,6 @@
 import type { EvanEvent, EvanContent, EvanSession, EvanPaper, EvanKeynote } from '../types';
 
-const API_BASE = 'https://evan.ugent.be/api/v1';
+const API_BASE = 'https://evan.ugent.be/api/v1/';
 
 export class ApiError extends Error {
   constructor(
@@ -41,7 +41,7 @@ function getEventCode(): string {
 }
 
 function getEventBaseUrl(): string {
-  return `${API_BASE}/events/${getEventCode()}`;
+  return `${API_BASE}events/${getEventCode()}/`;
 }
 
 async function fetchData<T>(url: string): Promise<T> {
@@ -50,12 +50,12 @@ async function fetchData<T>(url: string): Promise<T> {
 }
 
 async function fetchArray<T>(endpoint: string): Promise<T[]> {
-  const data = await fetchData<{ results?: T[] } | T[]>(`${getEventBaseUrl()}/${endpoint}`);
+  const data = await fetchData<{ results?: T[] } | T[]>(`${getEventBaseUrl()}${endpoint}`);
   return Array.isArray(data) ? data : data.results || [];
 }
 
 export async function fetchEvent(): Promise<EvanEvent> {
-  return fetchData<EvanEvent>(`${getEventBaseUrl()}/`);
+  return fetchData<EvanEvent>(getEventBaseUrl());
 }
 
 export async function fetchContents(): Promise<EvanContent[]> {

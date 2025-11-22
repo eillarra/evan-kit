@@ -77,7 +77,8 @@
   "peerDependencies": {
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
-    "vue": "^3.5.22"
+    "vue": "^3.5.22",
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",
@@ -96,6 +97,7 @@
     "vite": "^7.0.2",
     "vitest": "^1.0.0",
     "vue": "^3.5.17",
+    "vue-router": "^4.4.0",
     "vue-tsc": "^2.0.0"
   },
   "engines": {

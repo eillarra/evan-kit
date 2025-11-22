@@ -1,6 +1,8 @@
 import { ref, computed, watch } from 'vue';
 import { debounce } from 'quasar';
 
+import { normalizeText as normalizeTextUtil } from '../utils/text';
+
 export function useSearch<T>(
   items: () => T[],
   searchFields: (item: T) => string[],
@@ -16,7 +18,7 @@ export function useSearch<T>(
   const isSearching = ref(false);
 
   const normalizeText = (text: string) => {
-    return caseSensitive ? text : text.toLowerCase();
+    return caseSensitive ? text : normalizeTextUtil(text);
   };
 
   const searchInText = (searchTerm: string, text: string): boolean => {

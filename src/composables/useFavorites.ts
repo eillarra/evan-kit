@@ -17,13 +17,16 @@ let isGloballyInitialized = false;
 let currentStorageKey = '';
 let currentStorageVersion = 1;
 
-export function useFavorites(storageKey = 'evan_favorites', storageVersion = 1) {
+export function useFavorites(storageVersion = 1) {
+  const eventStore = useEventStore();
+
   // Use the global refs directly
   const favoriteSessionIds = globalFavoriteSessionIds;
   const favoriteSubsessionIds = globalFavoriteSubsessionIds;
 
-  // Update storage configuration
-  currentStorageKey = storageKey;
+  // Generate storage key from event code
+  const eventCode = eventStore.event?.code || 'evan';
+  currentStorageKey = `${eventCode}_favorites`;
   currentStorageVersion = storageVersion;
 
   // === Storage Management ===

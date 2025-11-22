@@ -3,6 +3,7 @@ export { default as MarkedDiv } from './components/MarkedDiv.vue';
 
 // Composables
 export { useSearch } from './composables/useSearch';
+export { useSearchQuery } from './composables/useSearchQuery';
 export { useProgramTemplate } from './composables/useProgramTemplate';
 export { useFavorites } from './composables/useFavorites';
 export { usePWAInstall } from './composables/usePWAInstall';
@@ -19,6 +20,7 @@ export { useEventStore } from './stores/event';
 export { render } from './utils/markdown';
 export { dateRange, formatImportantDate, passedImportantDate, format } from './utils/dates';
 export { toRomanNumeral, formatDecimal } from './utils/numbers';
+export { normalizeText, createSearchMatcher, searchInFields } from './utils/text';
 export {
   createTimeSlots,
   getSessionsByDate,
