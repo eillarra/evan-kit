@@ -3,20 +3,20 @@
 [![github-tests-badge]][github-tests]
 [![license-badge]](LICENSE)
 
-Shared Vue 3 component library for Evan academic conference applications.
+Shared Vue 3 toolkit for Evan academic conference PWA applications. Provides reusable components, composables, stores, utilities, and TypeScript types for building conference apps that consume the [Evan API](https://evan.ugent.be).
 
 ## Installation
 
-Add as a git submodule to your PWA project:
+Add as a git submodule to your Quasar/Vue PWA project:
 
 ```bash
 git submodule add https://github.com/eillarra/evan-kit.git evan-kit
 git submodule update --init --recursive
 ```
 
-### TypeScript configuration
+### Configuration
 
-Add to your `tsconfig.json`:
+**tsconfig.json:**
 
 ```json
 {
@@ -24,86 +24,121 @@ Add to your `tsconfig.json`:
     "paths": {
       "@evan/*": ["./evan-kit/src/*"]
     }
-  },
-  "include": ["evan-kit/src/types/global.d.ts"]
+  }
 }
 ```
 
-### Vite configuration
-
-Add to your `vite.config.ts`:
+**vite.config.ts** (or quasar.config.ts):
 
 ```typescript
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@evan': path.resolve(__dirname, './evan-kit/src'),
-    },
+resolve: {
+  alias: {
+    '@evan': path.resolve(__dirname, './evan-kit/src'),
   },
-});
+}
 ```
 
 ## Usage
 
-### Global Types
+### Store
 
-Types are automatically available without imports:
+The `useEventStore` is the main data store for event, sessions, papers, and keynotes:
 
-```vue
-<script setup lang="ts">
-const event: EvanEvent = {};
-const session: EvanSession = {};
-</script>
+```typescript
+import { useEventStore } from '@evan/stores/event';
+
+const eventStore = useEventStore();
+await eventStore.init('fpl2026');
+await eventStore.fetchProgramData();
 ```
 
 ### Components
 
 ```vue
 <script setup lang="ts">
-import MarkedDiv from 'evan-kit/components/MarkedDiv.vue';
+import MarkedDiv from '@evan/components/MarkedDiv.vue';
 </script>
 
 <template>
-  <MarkedDiv :text="markdownContent" />
+  <marked-div :text="markdownContent" />
 </template>
+```
+
+### Composables
+
+```typescript
+import { useFavorites } from '@evan/composables/useFavorites';
+import { usePersonalCalendar } from '@evan/composables/usePersonalCalendar';
+import { useSearch } from '@evan/composables/useSearch';
 ```
 
 ### Utilities
 
-```vue
-<script setup lang="ts">
-import { useSearch } from 'evan-kit/composables/useSearch';
-import { formatImportantDate } from 'evan-kit/utils/dates';
-import { toRomanNumeral } from 'evan-kit/utils/numbers';
-
-const { searchQuery, searchResults } = useSearch();
-</script>
+```typescript
+import { formatImportantDate, dateRange } from '@evan/utils/dates';
+import { toRomanNumeral } from '@evan/utils/numbers';
+import { normalizeText, searchInFields } from '@evan/utils/text';
+import { logger, initLogger } from '@evan/utils/logger';
 ```
-
-## Available exports
-
-### Components
-
-- `MarkedDiv` - Renders markdown safely
-
-### Composables
-
-- `useSearch` - Debounced search functionality
-- `useFavorites` - User favorites management
-- `usePersonalCalendar` - Calendar management
-- `useProgramTemplate` - Program helpers
-- `usePWAInstall` - PWA installation prompts
-
-### Utils
-
-- **Dates**: `formatImportantDate`, `dateRange`, `passedImportantDate`
-- **Numbers**: `toRomanNumeral`, `formatDecimal`
-- **Markdown**: `render`
-- **Program**: Session and program management utilities
 
 ### Types
 
-Global types available: `EvanEvent`, `EvanSession`, `EvanSubsession`, `EvanPaper`, `EvanKeynote`, `EvanTrack`, `EvanVenue`, `EvanRoom`, `ImportantDate`
+```typescript
+import type { EvanEvent, EvanSession, EvanPaper } from '@evan/types';
+```
+
+## Exports
+
+### Store
+
+- `useEventStore` - Central Pinia store for event data
+
+### API
+
+- `fetchEvent`, `fetchSessions`, `fetchPapers`, `fetchKeynotes` - API client functions
+- `ApiError` - Error class for API failures
+
+### Components
+
+- `MarkedDiv` - Renders markdown with external link handling
+
+### Composables
+
+- `useFavorites` - LocalStorage-based favorites management
+- `usePersonalCalendar` - Personal calendar from favorites
+- `useProgramTemplate` - Program template rendering
+- `usePWAInstall` - PWA installation prompt handling
+- `useSearch` - Debounced search with text normalization
+- `useSearchQuery` - URL-synced search query state
+
+### Utilities
+
+- **dates**: `dateRange`, `formatImportantDate`, `passedImportantDate`
+- **logger**: `initLogger`, `logger` (Sentry integration)
+- **markdown**: `render`
+- **numbers**: `formatDecimal`, `toRomanNumeral`
+- **text**: `createSearchMatcher`, `normalizeText`, `searchInFields`
+- **program**: Session grouping, filtering, sorting utilities
+
+### Types
+
+`EvanEvent`, `EvanSession`, `EvanSubsession`, `EvanPaper`, `EvanKeynote`, `EvanTrack`, `EvanTopic`, `EvanVenue`, `EvanRoom`, `EvanContent`, `ImportantDate`
+
+## Logger
+
+The logger utility provides unified logging that works with Sentry in production:
+
+```typescript
+import { logger, initLogger } from '@evan/utils/logger';
+import * as Sentry from '@sentry/vue';
+
+// Initialize once in your app boot
+initLogger(process.env.PROD ? Sentry : null, !!process.env.PROD);
+
+// Use anywhere
+logger.info('User action', { userId: 123 });
+logger.error('Failed to load', { error: String(err) });
+```
 
 [github-tests]: https://github.com/eillarra/evan-kit/actions/workflows/tests.yml
 [github-tests-badge]: https://github.com/eillarra/evan-kit/actions/workflows/tests.yml/badge.svg?branch=main

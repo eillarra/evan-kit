@@ -21,6 +21,7 @@ export { render } from './utils/markdown';
 export { dateRange, formatImportantDate, passedImportantDate, format } from './utils/dates';
 export { toRomanNumeral, formatDecimal } from './utils/numbers';
 export { normalizeText, createSearchMatcher, searchInFields } from './utils/text';
+export { logger, initLogger } from './utils/logger';
 export {
   createTimeSlots,
   getSessionsByDate,

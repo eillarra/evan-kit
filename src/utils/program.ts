@@ -1,6 +1,7 @@
 import type { EvanSession, EvanTrack, EvanRoom, EvanKeynote, EvanSubsession, EvanFile, EvanTopic } from '../types';
 
 import { toRomanNumeral } from './numbers';
+import { searchInFields } from './text';
 
 /**
  * Extract avatar file from keynote files array
@@ -9,20 +10,6 @@ import { toRomanNumeral } from './numbers';
  */
 export function getKeynoteAvatar(keynote: EvanKeynote): EvanFile | undefined {
   return keynote.files?.find((file) => file.tags?.includes('_internal:avatar'));
-}
-
-/**
- * Simple search utility function
- */
-function searchInFields(searchQuery: string, ...fields: (string | undefined | null)[]): boolean {
-  if (!searchQuery || !searchQuery.trim()) return true;
-
-  const query = searchQuery.toLowerCase().trim();
-  const searchableFields = fields.filter(
-    (field): field is string => typeof field === 'string' && field.trim().length > 0,
-  );
-
-  return searchableFields.some((field) => field.toLowerCase().includes(query));
 }
 
 /**

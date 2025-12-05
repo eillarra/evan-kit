@@ -34,14 +34,10 @@ export function useSearchQuery(queryParam = 'q', debounceMs = 300) {
       delete currentQuery[queryParam];
     }
 
-    const navigationPromise = router.replace({
+    router.replace({
       name: route.name || undefined,
       params: route.params,
       query: currentQuery,
-    });
-
-    navigationPromise.catch((error) => {
-      throw error;
     });
   };
 
