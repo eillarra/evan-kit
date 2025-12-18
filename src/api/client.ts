@@ -28,9 +28,16 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 let eventCode: string | null = null;
+let isArchived = false;
+let archiveBaseUrl = '/data/';
 
 export function setEventCode(code: string) {
   eventCode = code;
+}
+
+export function setArchived(archived: boolean, baseUrl = '/data/') {
+  isArchived = archived;
+  archiveBaseUrl = baseUrl;
 }
 
 function getEventCode(): string {
@@ -45,6 +52,33 @@ function getEventBaseUrl(): string {
 }
 
 async function fetchData<T>(url: string): Promise<T> {
+  if (isArchived) {
+    const eventBaseUrl = getEventBaseUrl();
+    if (url.startsWith(eventBaseUrl)) {
+      const relativePath = url.substring(eventBaseUrl.length);
+      let filename = relativePath;
+      if (filename === '') filename = 'event.json';
+      else if (filename.endsWith('/')) filename = filename.slice(0, -1) + '.json';
+
+      // Ensure archiveBaseUrl ends with /
+      const baseUrl = archiveBaseUrl.endsWith('/') ? archiveBaseUrl : `${archiveBaseUrl}/`;
+      const localUrl = `${baseUrl}${filename}`;
+
+      const response = await fetch(localUrl);
+      return handleResponse<T>(response);
+    }
+
+    // Handle relative paths (rewritten by archive script)
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      const baseUrl = archiveBaseUrl.endsWith('/') ? archiveBaseUrl : `${archiveBaseUrl}/`;
+      const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+      const localUrl = `${baseUrl}${cleanUrl}`;
+
+      const response = await fetch(localUrl);
+      return handleResponse<T>(response);
+    }
+  }
+
   const response = await fetch(url);
   return handleResponse<T>(response);
 }

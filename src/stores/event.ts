@@ -105,6 +105,10 @@ export const useEventStore = defineStore('evanEvent', () => {
     contents.value = await api.fetchContents();
   }
 
+  function setArchived(archived: boolean, baseUrl?: string) {
+    api.setArchived(archived, baseUrl);
+  }
+
   async function fetchSessionDetail(session: EvanSession): Promise<EvanSession> {
     try {
       return await api.fetchSessionDetail(session.self);
@@ -131,6 +135,7 @@ export const useEventStore = defineStore('evanEvent', () => {
     topics,
     rooms,
     init,
+    setArchived,
     fetchProgramData,
     fetchSessionDetail,
   };

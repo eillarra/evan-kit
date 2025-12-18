@@ -20,6 +20,9 @@
     "url": "https://github.com/eillarra/evan-kit.git"
   },
   "main": "./dist/index.js",
+  "bin": {
+    "evan-archive": "./bin/archive.js"
+  },
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
