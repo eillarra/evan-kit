@@ -1,8 +1,14 @@
 import type { ImportantDate } from '@evan/types';
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { dateRange, formatImportantDate, passedImportantDate } from '@evan/utils/dates';
+import { dateRange, formatImportantDate, passedImportantDate, setupDates } from '@evan/utils/dates';
+
+// Ensure consistent timezone (UTC) for all tests by default
+// This prevents system timezone from affecting tests and prevents leaking state between tests
+beforeEach(() => {
+  setupDates('UTC', true);
+});
 
 describe('dateRange', () => {
   it('should format single month date range', () => {
@@ -123,5 +129,52 @@ describe('passedImportantDate', () => {
 
     const result = passedImportantDate(recentDate);
     expect(typeof result).toBe('boolean');
+  });
+});
+
+describe('Timezone Handling', () => {
+  it('should respect configured timezone for non-virtual events', () => {
+    // Set to Brussels (UTC+1/UTC+2)
+    setupDates('Europe/Brussels', false);
+
+    // Date at UTC midnight. In Brussels (CET/CEST), this is 1AM or 2AM same day.
+    const date: ImportantDate = {
+      label: 'Conference',
+      start_date: '2025-06-01T00:00:00Z',
+      end_date: '2025-06-01T00:00:00Z',
+      format: 'date',
+      aoe: false,
+    };
+
+    expect(formatImportantDate(date)).toBe('June 1, 2025');
+
+    // Set to New York (UTC-4/UTC-5)
+    setupDates('America/New_York', false);
+
+    // Date at UTC midnight. In NY, this is 8PM the previous day.
+    expect(formatImportantDate(date)).toBe('May 31, 2025');
+  });
+
+  it('should use timezone for dateRange helper directly', () => {
+    setupDates('America/New_York', false);
+    // UTC Midnight
+    const result = dateRange('2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z');
+    expect(result).toBe('May 31-31, 2025');
+  });
+
+  it('should fall back to local/system timezone if virtual', () => {
+    // If virtual is true, it ignores the passed timezone string
+    setupDates('Australia/Sydney', true);
+
+    const date: ImportantDate = {
+      label: 'Virtual Conference',
+      start_date: '2025-06-01T00:00:00Z',
+      end_date: null,
+      format: 'month',
+      aoe: false,
+    };
+
+    const result = formatImportantDate(date);
+    expect(result).toBeTruthy();
   });
 });

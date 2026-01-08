@@ -1,15 +1,35 @@
 import type { ImportantDate } from '../types';
 
 import { format } from 'date-fns';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 
-function dateRange(startDate: string | Date, endDate: string | Date | null, includeYear: boolean = true): string {
+let _timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let _isVirtual = true;
+
+export function setupDates(timezone: string, isVirtual: boolean) {
+  _timezone = timezone;
+  _isVirtual = isVirtual;
+}
+
+function getTimezone(): string {
+  return !_isVirtual && _timezone ? _timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function dateRange(
+  startDate: string | Date,
+  endDate: string | Date | null,
+  includeYear: boolean = true,
+  timzeone?: string,
+): string {
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : start;
-  const startMonth = start.toLocaleString('default', { month: 'long' });
-  const endMonth = end.toLocaleString('default', { month: 'long' }) || '';
-  const startDay = start.getDate();
-  const endDay = end.getDate();
-  const startYear = start.getFullYear();
+  const tz = timzeone ?? getTimezone();
+
+  const startMonth = formatInTimeZone(start, tz, 'MMMM');
+  const endMonth = formatInTimeZone(end, tz, 'MMMM');
+  const startDay = formatInTimeZone(start, tz, 'd');
+  const endDay = formatInTimeZone(end, tz, 'd');
+  const startYear = formatInTimeZone(start, tz, 'yyyy');
 
   if (startMonth === endMonth) {
     if (includeYear) {
@@ -28,37 +48,18 @@ function dateRange(startDate: string | Date, endDate: string | Date | null, incl
 function _formatImportantDateRange(date: ImportantDate, aoe?: boolean): string {
   const startDate = new Date(date.start_date);
   const endDate = date.end_date ? new Date(date.end_date) : startDate;
-
-  if (aoe) {
-    // AoE is UTC−12:00[4] (daylight saving time [DST] is not applicable)
-    startDate.setHours(startDate.getHours() + 12);
-    endDate.setHours(endDate.getHours() + 12);
-  }
+  const tz = aoe ? 'UTC' : getTimezone();
 
   if (date.format === 'date') {
-    return dateRange(startDate, endDate, true);
+    return dateRange(startDate, endDate, true, tz);
   }
 
   if (date.format === 'month') {
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return monthNames[startDate.getMonth()];
+    return formatInTimeZone(startDate, tz, 'MMMM');
   }
 
   if (date.format === 'range') {
-    return dateRange(startDate, endDate, false);
+    return dateRange(startDate, endDate, false, tz);
   }
 
   return '';
@@ -70,36 +71,41 @@ function formatImportantDate(date: ImportantDate, aoe?: boolean): string {
   }
 
   const dateToFormat = new Date(date.start_date);
-
-  if (aoe) {
-    // AoE is UTC−12:00[4] (daylight saving time [DST] is not applicable)
-    dateToFormat.setHours(dateToFormat.getHours() + 12);
-  }
+  const tz = aoe ? 'UTC' : getTimezone();
 
   if (date.format === 'date') {
-    return format(dateToFormat, 'MMMM d, yyyy');
+    return formatInTimeZone(dateToFormat, tz, 'MMMM d, yyyy');
   }
 
   if (date.format === 'month') {
-    return format(dateToFormat, 'MMMM');
+    return formatInTimeZone(dateToFormat, tz, 'MMMM');
   }
 
   return '';
 }
 
 function passedImportantDate(date: ImportantDate): boolean {
-  // AoE is UTC−12:00[4] (daylight saving time [DST] is not applicable)
-  const dateToCheck = date.end_date ? date.end_date : date.start_date;
-  const dateToCheckDate = new Date(dateToCheck);
-  dateToCheckDate.setHours(23, 59, 59, 999);
+  let endDateStr = date.end_date || date.start_date;
 
-  if (date.aoe) {
-    const aoeDate = dateToCheckDate;
-    aoeDate.setHours(aoeDate.getHours() + 12);
-    return aoeDate < new Date();
+  // Append end-of-day time if only date is provided
+  if (!endDateStr.includes('T') && !endDateStr.includes(':')) {
+    endDateStr += ' 23:59:59.999';
   }
 
-  return dateToCheckDate < new Date();
+  let deadlineDate: Date;
+
+  if (date.aoe) {
+    // AoE is UTC-12:00. Deadline is end of day in AoE.
+    deadlineDate = fromZonedTime(endDateStr, '-1200');
+  } else if (_isVirtual) {
+    // Virtual: Use user's local time for deadline
+    deadlineDate = fromZonedTime(endDateStr, Intl.DateTimeFormat().resolvedOptions().timeZone);
+  } else {
+    // Event Timezone
+    deadlineDate = fromZonedTime(endDateStr, getTimezone());
+  }
+
+  return new Date() > deadlineDate;
 }
 
 export { dateRange, formatImportantDate, passedImportantDate, format };
