@@ -10,7 +10,10 @@ export interface EvanVenueRoom {
 export interface EvanVenue {
   readonly is_main: boolean;
   readonly name: string;
+  readonly city: string | EmptyString;
   readonly presentation: MarkdownText | EmptyString;
   readonly rooms: EvanVenueRoom[];
   readonly gmaps: Url | EmptyString;
+  readonly google_place_id: string | EmptyString;
+  readonly website: Url | EmptyString;
 }
