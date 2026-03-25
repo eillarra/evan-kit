@@ -2,6 +2,7 @@
 .evan__marked :deep(img) {
   max-width: 100%;
   height: auto;
+  margin: 1em 0;
 }
 </style>
 
