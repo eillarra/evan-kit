@@ -9,8 +9,9 @@ import type { EvanVenue } from './venues';
 export interface EvanFee {
   readonly type: string;
   readonly notes: string;
-  readonly early_value: number;
+  readonly early_value: number | null;
   readonly value: number;
+  readonly onsite_value: number | null;
   readonly config: {
     included_social_events: number[];
   };
@@ -29,8 +30,9 @@ export interface EvanEvent {
   readonly end_date: string;
   readonly is_open_for_registration: boolean;
   readonly registration_start_date: string;
-  readonly registration_early_deadline: string;
+  readonly registration_early_deadline: string | null;
   readonly registration_deadline: string;
+  readonly registration_onsite_deadline: string | null;
   readonly registration_url: Url;
   readonly fees: EvanFee[];
   readonly sponsors: EvanSponsor[];
