@@ -1,6 +1,7 @@
 import type { MarkdownText, EmptyString, Url, EvanCountry } from './generic';
 import type { ImportantDate } from './extra_data';
 import type { EvanSession } from './sessions';
+import type { EvanSponsor } from './sponsors';
 import type { EvanTrack } from './tracks';
 import type { EvanTopic } from './topics';
 import type { EvanVenue } from './venues';
@@ -32,11 +33,13 @@ export interface EvanEvent {
   readonly registration_deadline: string;
   readonly registration_url: Url;
   readonly fees: EvanFee[];
+  readonly sponsors: EvanSponsor[];
   readonly sessions: EvanSession[];
   readonly tracks: EvanTrack[];
   readonly topics: EvanTopic[];
   readonly venues: EvanVenue[];
   readonly extra_data: {
     important_dates: ImportantDate[];
+    sponsor_types: string[];
   };
 }

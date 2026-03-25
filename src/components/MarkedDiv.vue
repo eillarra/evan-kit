@@ -1,3 +1,10 @@
+<style scoped>
+.evan__marked :deep(img) {
+  max-width: 100%;
+  height: auto;
+}
+</style>
+
 <template>
   <div v-if="hasContent" v-html="html" class="evan__marked"></div>
 </template>

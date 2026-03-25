@@ -55,5 +55,6 @@ export type {
   EvanTopic,
   EvanVenue,
   EvanRoom,
+  EvanSponsor,
   ImportantDate,
 } from './types';

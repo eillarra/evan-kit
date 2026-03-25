@@ -4,6 +4,7 @@ import type {
   EvanSession,
   EvanPaper,
   EvanKeynote,
+  EvanSponsor,
   EvanVenue,
   EvanTrack,
   EvanTopic,
@@ -29,7 +30,7 @@ export const useEventStore = defineStore('evanEvent', () => {
   const _loaded = computed<boolean>(() => !!(event.value && contents.value));
 
   const contactEmail = computed<string>(() => {
-    if (event.value) return event.value.email;
+    if (event.value?.email) return event.value.email;
     return 'evan@ugent.be';
   });
 
@@ -48,6 +49,8 @@ export const useEventStore = defineStore('evanEvent', () => {
 
   const tracks = computed<EvanTrack[]>(() => event.value?.tracks || []);
   const topics = computed<EvanTopic[]>(() => event.value?.topics || []);
+  const sponsors = computed<EvanSponsor[]>(() => event.value?.sponsors || []);
+  const sponsorTypes = computed<string[]>(() => event.value?.extra_data?.sponsor_types || []);
   const rooms = computed<EvanRoom[]>(() => {
     if (!event.value?.venues) return [];
     return event.value.venues.flatMap((venue) => venue.rooms || []);
@@ -133,6 +136,8 @@ export const useEventStore = defineStore('evanEvent', () => {
     mainVenue,
     tracks,
     topics,
+    sponsors,
+    sponsorTypes,
     rooms,
     init,
     setArchived,

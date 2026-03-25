@@ -11,4 +11,5 @@ export type { EvanTopic } from './topics';
 export type { EvanVenue, EvanVenueRoom } from './venues';
 export type { EvanRoom } from './rooms';
 export type { EvanFile } from './files';
+export type { EvanSponsor } from './sponsors';
 export type { EvanContent } from './contents';
