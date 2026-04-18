@@ -1,8 +1,46 @@
-import type { EvanKeynote, EvanFile } from '../../src/types';
+import type { EvanKeynote, EvanFile, EvanSession } from '../../src/types';
 
 import { describe, it, expect } from 'vitest';
 
-import { getKeynoteAvatar } from '../../src/utils/program';
+import { getKeynoteAvatar, groupSessionsByDayAdvanced, getAvailableDays } from '../../src/utils/program';
+
+describe('groupSessionsByDayAdvanced', () => {
+  it('groups sessions by date in the event timezone, not UTC', () => {
+    // 08:45 Mon Sep 7 Brussels time = 06:45 UTC Sep 7 → must land in Sep 7 group, not Sep 6
+    const sessions = [
+      { id: 1, start_at: '2026-09-07T06:45:00Z' } as EvanSession,
+      { id: 2, start_at: '2026-09-08T06:45:00Z' } as EvanSession,
+    ];
+
+    const groups = groupSessionsByDayAdvanced(sessions, [], 'Europe/Brussels');
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0].date).toBe('2026-09-07');
+    expect(groups[1].date).toBe('2026-09-08');
+  });
+
+  it('produces the correct weekday label in the event timezone', () => {
+    const sessions = [{ id: 1, start_at: '2026-09-07T06:45:00Z' } as EvanSession];
+
+    const groups = groupSessionsByDayAdvanced(sessions, [], 'Europe/Brussels');
+
+    // Mon Sep 7 in Brussels
+    expect(groups[0].dateLabel).toMatch(/Mon/);
+    expect(groups[0].dateLabel).toMatch(/Sep/);
+    expect(groups[0].dateLabel).toMatch(/7/);
+  });
+});
+
+describe('getAvailableDays', () => {
+  it('extracts the date in the event timezone, not UTC', () => {
+    const sessions = [{ id: 1, start_at: '2026-09-07T06:45:00Z' } as EvanSession];
+
+    const days = getAvailableDays(sessions, 'Europe/Brussels');
+
+    expect(days).toHaveLength(1);
+    expect(days[0].date).toBe('2026-09-07');
+  });
+});
 
 describe('getKeynoteAvatar', () => {
   it('should return avatar file when _internal:avatar tag is present', () => {

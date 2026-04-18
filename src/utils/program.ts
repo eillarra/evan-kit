@@ -543,6 +543,9 @@ export function groupSessionsByDayAdvanced(
   eventTimezone: string = 'Europe/Brussels',
   isVirtualEvent: boolean = false,
 ): SessionGroup[] {
+  // Use local timezone for virtual events, event timezone for in-person events
+  const timeZone = isVirtualEvent ? undefined : eventTimezone;
+
   const groups = new Map<string, EvanSession[]>();
   const undatedSessions: EvanSession[] = [];
 
@@ -552,21 +555,20 @@ export function groupSessionsByDayAdvanced(
       return;
     }
 
-    const date = new Date(session.start_at).toISOString().split('T')[0];
+    // Extract the date in the event timezone to avoid UTC offset shifting the day
+    const date = new Date(session.start_at).toLocaleDateString('en-CA', { timeZone });
     if (!groups.has(date)) {
       groups.set(date, []);
     }
     groups.get(date)?.push(session);
   });
 
-  // Use local timezone for virtual events, event timezone for in-person events
-  const timeZone = isVirtualEvent ? undefined : eventTimezone;
-
   const result = Array.from(groups.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, sessions]) => ({
       date,
-      dateLabel: new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+      // Use noon UTC to avoid local browser timezone shifting the displayed weekday
+      dateLabel: new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -609,25 +611,23 @@ export function getAvailableDays(
   sessions.forEach((session) => {
     if (!session.start_at) return;
 
+    const timeZone = isVirtualEvent ? undefined : eventTimezone;
+    const dateOnly = new Date(session.start_at).toLocaleDateString('en-CA', { timeZone }); // YYYY-MM-DD in event timezone
+
     // Use the exact same formatting logic as session display for full format
     // Or extract just the weekday for the shortest format
     let dayLabel: string;
     if (format === 'weekday-only') {
-      const date = new Date(session.start_at);
-      const timeZone = isVirtualEvent ? undefined : eventTimezone;
-      dayLabel = date.toLocaleDateString('en-US', {
+      dayLabel = new Date(session.start_at).toLocaleDateString('en-US', {
         weekday: 'short',
         timeZone,
       });
     } else {
       dayLabel = formatProgramDate(session.start_at, 'short', eventTimezone, isVirtualEvent);
     }
-    const dateOnly = new Date(session.start_at).toISOString().split('T')[0]; // YYYY-MM-DD
 
     // Extract weekday for the value (lowercase)
-    const date = new Date(session.start_at);
-    const timeZone = isVirtualEvent ? undefined : eventTimezone;
-    const weekdayLong = date
+    const weekdayLong = new Date(session.start_at)
       .toLocaleDateString('en-US', {
         weekday: 'long',
         timeZone,
