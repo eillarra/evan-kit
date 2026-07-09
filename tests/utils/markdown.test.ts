@@ -50,4 +50,17 @@ describe('markdown render', () => {
     expect(result).toContain('<p>First paragraph</p>');
     expect(result).toContain('<p>Second paragraph</p>');
   });
+
+  it('should add class and style attributes via markdown-it-attrs', () => {
+    const result = render('![Badge](https://example.com/badge.png){.float-right style="height:100px"}');
+    expect(result).toContain('<img');
+    expect(result).toContain('class="float-right"');
+    expect(result).toContain('style="height:100px"');
+  });
+
+  it('should not allow arbitrary raw HTML', () => {
+    const result = render('<script>alert("xss")</script>');
+    expect(result).not.toContain('<script>');
+    expect(result).toContain('&lt;script&gt;');
+  });
 });

@@ -1,7 +1,14 @@
 import MarkdownIt from 'markdown-it';
+import attrs from 'markdown-it-attrs';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 
 const md = new MarkdownIt();
+
+md.use(attrs, {
+  allowedAttributes: ['class', 'style'],
+  leftDelimiter: '{',
+  rightDelimiter: '}',
+});
 
 // Override the default link renderer to add target="_blank" to external links
 const defaultRender: RenderRule =

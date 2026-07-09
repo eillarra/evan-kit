@@ -1,6 +1,6 @@
 {
   "name": "evan-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vue toolkit for Evan conference applications.",
   "author": "Eneko Illarramendi <eneko.illarramendi@ugent.be>",
   "license": "MIT",
@@ -19,6 +19,10 @@
     "type": "git",
     "url": "https://github.com/eillarra/evan-kit.git"
   },
+  "engines": {
+    "node": "^24"
+  },
+  "packageManager": "yarn@4.17.1",
   "main": "./dist/index.js",
   "bin": {
     "evan-archive": "./bin/archive.js"
@@ -75,7 +79,8 @@
   "dependencies": {
     "date-fns": "^3.0.0",
     "date-fns-tz": "^3.2.0",
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.0",
+    "markdown-it-attrs": "^5.0.0"
   },
   "peerDependencies": {
     "pinia": "^3.0.1",
@@ -102,8 +107,5 @@
     "vue": "^3.5.17",
     "vue-router": "^4.4.0",
     "vue-tsc": "^2.0.0"
-  },
-  "engines": {
-    "node": "^24"
   }
 }
