@@ -392,42 +392,7 @@ export function formatProgramTime(
 }
 
 /**
- * Extract numeric value from ARES roman numeral codes for proper sorting
- * @param code - Session code that might contain ARES roman numerals
- * @returns Numeric value for sorting, or 0 if no roman numeral found
- */
-function extractAresRomanValue(code: string): number {
-  const match = code.match(/ARES\s+([IVXLCDM]+)/i);
-  if (!match) return 0;
-
-  const romanToArabic: Record<string, number> = {
-    I: 1,
-    II: 2,
-    III: 3,
-    IV: 4,
-    V: 5,
-    VI: 6,
-    VII: 7,
-    VIII: 8,
-    IX: 9,
-    X: 10,
-    XI: 11,
-    XII: 12,
-    XIII: 13,
-    XIV: 14,
-    XV: 15,
-    XVI: 16,
-    XVII: 17,
-    XVIII: 18,
-    XIX: 19,
-    XX: 20,
-  };
-
-  return romanToArabic[match[1].toUpperCase()] || 0;
-}
-
-/**
- * Smart comparison function for session codes that handles ARES roman numerals properly
+ * Compares session codes, null codes last.
  * @param codeA - First session code
  * @param codeB - Second session code
  * @returns Comparison result for sorting
@@ -437,23 +402,12 @@ function compareSessionCodes(codeA: string | null, codeB: string | null): number
   if (!codeA) return 1;
   if (!codeB) return -1;
 
-  const aIsAres = codeA.toUpperCase().startsWith('ARES');
-  const bIsAres = codeB.toUpperCase().startsWith('ARES');
-
-  if (aIsAres && bIsAres) {
-    const aValue = extractAresRomanValue(codeA);
-    const bValue = extractAresRomanValue(codeB);
-    if (aValue !== bValue) {
-      return aValue - bValue;
-    }
-  }
-
   return codeA.localeCompare(codeB);
 }
 
 /**
  * Sort keynotes by subsession start_at (or session start_at if no subsession),
- * then by session code with smart ARES roman numeral handling
+ * then by session code
  * @param keynotes - Array of keynotes to sort
  * @param sessions - Array of sessions for lookup
  * @returns Sorted array of keynotes
@@ -530,7 +484,7 @@ export function sortSessionsAdvanced(sessions: EvanSession[], tracks: EvanTrack[
 }
 
 /**
- * Group sessions by day with advanced sorting (prioritizing Keynotes and handling ARES codes)
+ * Group sessions by day with advanced sorting (prioritizing Keynotes)
  * @param sessions - Array of sessions to group
  * @param tracks - Array of tracks for priority sorting
  * @param eventTimezone - The event timezone (defaults to 'Europe/Brussels')
