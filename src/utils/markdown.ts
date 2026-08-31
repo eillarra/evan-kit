@@ -2,7 +2,10 @@ import MarkdownIt from 'markdown-it';
 import attrs from 'markdown-it-attrs';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 
-const md = new MarkdownIt();
+// html: true is required so CMS-embedded HTML markers like <paper-ref ...>
+// survive rendering and can be enhanced by ProgramMarkedDiv. Content comes from
+// the trusted conference CMS; sanitize backend-side if needed.
+const md = new MarkdownIt({ html: true });
 
 md.use(attrs, {
   allowedAttributes: ['class', 'style'],

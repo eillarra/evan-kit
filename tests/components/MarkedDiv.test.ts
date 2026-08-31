@@ -79,4 +79,16 @@ describe('MarkedDiv Component', () => {
     expect(html).toContain('<strong>Bold</strong>');
     expect(html).toContain('<em>italic</em>');
   });
+
+  it('should pass through raw HTML markers like paper-ref unescaped', () => {
+    const text = '**Title** <paper-ref data-paper-id="165" data-paper-title="Title"></paper-ref>';
+
+    const wrapper = mount(MarkedDiv, {
+      props: {
+        text,
+      },
+    });
+
+    expect(wrapper.html()).toContain('<paper-ref data-paper-id="165" data-paper-title="Title"></paper-ref>');
+  });
 });
