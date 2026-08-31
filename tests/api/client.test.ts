@@ -15,6 +15,7 @@ describe('API Client', () => {
   describe('setEventCode', () => {
     it('should set the event code', () => {
       api.setEventCode('new-event');
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
       // Test by calling a function that requires event code
       expect(() => api.fetchEvent()).not.toThrow();
     });
