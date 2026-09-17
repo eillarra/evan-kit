@@ -1,10 +1,12 @@
 import MarkdownIt from 'markdown-it';
 import attrs from 'markdown-it-attrs';
+import sanitizeHtml from 'sanitize-html';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 
-// html: true is required so CMS-embedded HTML markers like <paper-ref ...>
+// html: true is required so generated HTML markers like <paper-ref ...>
 // survive rendering and can be enhanced by ProgramMarkedDiv. Content comes from
-// the trusted conference CMS; sanitize backend-side if needed.
+// the trusted conference CMS, but raw HTML is still sanitized on output so
+// script/iframe/event-handler injection cannot pass through.
 const md = new MarkdownIt({ html: true });
 
 md.use(attrs, {
@@ -38,7 +40,30 @@ md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
 };
 
 function render(text: string): string {
-  return md.render(text);
+  return sanitizeHtml(md.render(text), {
+    // Escape disallowed tags instead of discarding them so CMS typos stay visible
+    disallowedTagsMode: 'escape',
+    // Defaults are text-only; allow the inline/media tags CMS content relies on
+    allowedTags: [
+      ...sanitizeHtml.defaults.allowedTags,
+      'a',
+      'b',
+      'i',
+      'em',
+      'strong',
+      'br',
+      'code',
+      'img',
+      'paper-ref',
+    ],
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      a: ['href', 'name', 'target', 'rel', 'title'],
+      img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
+      // paper-ref markers carry data-paper-id / data-paper-title attributes
+      '*': ['class', 'style', 'data-*'],
+    },
+  });
 }
 
 export { render };
