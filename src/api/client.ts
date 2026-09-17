@@ -68,11 +68,21 @@ async function fetchData<T>(url: string): Promise<T> {
       return handleResponse<T>(response);
     }
 
-    // Handle relative paths (rewritten by archive script)
+    // Resource detail URLs outside the event scope (e.g. /api/v1/sessions/255/)
+    const detailMatch = url.match(/\/api\/v1\/(sessions|papers|keynotes)\/(\d+)\/?$/);
+    if (detailMatch) {
+      const baseUrl = archiveBaseUrl.endsWith('/') ? archiveBaseUrl : `${archiveBaseUrl}/`;
+      const localUrl = `${baseUrl}${detailMatch[1]}/${detailMatch[2]}.json`;
+
+      const response = await fetch(localUrl);
+      return handleResponse<T>(response);
+    }
+
+    // Handle relative paths (rewritten by archive script, e.g. /data/sessions/255.json)
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       const baseUrl = archiveBaseUrl.endsWith('/') ? archiveBaseUrl : `${archiveBaseUrl}/`;
-      const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
-      const localUrl = `${baseUrl}${cleanUrl}`;
+      // Already rooted under the archive base: use as-is, don't prefix twice
+      const localUrl = url.startsWith(baseUrl) ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
       const response = await fetch(localUrl);
       return handleResponse<T>(response);

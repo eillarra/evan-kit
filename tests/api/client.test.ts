@@ -169,4 +169,55 @@ describe('API Client', () => {
       await expect(api.fetchEvent()).rejects.toThrow('Network error');
     });
   });
+
+  describe('archived mode', () => {
+    afterEach(() => {
+      api.setArchived(false);
+    });
+
+    it('should map event URL to event.json', async () => {
+      api.setArchived(true, '/data/');
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+
+      await api.fetchEvent();
+
+      expect(global.fetch).toHaveBeenCalledWith('/data/event.json');
+    });
+
+    it('should map list endpoints to flat JSON files', async () => {
+      api.setArchived(true, '/data/');
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] });
+
+      await api.fetchSessions();
+      await api.fetchPapers();
+      await api.fetchKeynotes();
+      await api.fetchContents();
+
+      expect(global.fetch).toHaveBeenCalledWith('/data/sessions.json');
+      expect(global.fetch).toHaveBeenCalledWith('/data/papers.json');
+      expect(global.fetch).toHaveBeenCalledWith('/data/keynotes.json');
+      expect(global.fetch).toHaveBeenCalledWith('/data/contents.json');
+    });
+
+    it('should map absolute session URL to detail file', async () => {
+      api.setArchived(true, '/data/');
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+
+      await api.fetchSessionDetail('https://evan.ugent.be/api/v1/sessions/255/');
+
+      expect(global.fetch).toHaveBeenCalledWith('/data/sessions/255.json');
+    });
+
+    it('should not double-prefix archive base for rewritten self paths', async () => {
+      api.setArchived(true, '/data/');
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+
+      // Regression: self links rewritten by evan-archive are /data/... — fetching them
+      // must not produce /data/data/...
+      await api.fetchSessionDetail('/data/sessions/255.json');
+
+      expect(global.fetch).toHaveBeenCalledWith('/data/sessions/255.json');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+  });
 });

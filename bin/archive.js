@@ -6,6 +6,8 @@ import { URL } from 'url';
 
 // Set to track processed URLs to avoid cycles and redundant downloads
 const processedUrls = new Set();
+// Detect basename collisions: two different URLs flattening to the same media file
+const mediaSources = new Map();
 
 async function fetchAndSave(url, outputPath, downloadQueue, detailsQueue) {
   if (processedUrls.has(url)) return;
@@ -47,8 +49,16 @@ function findAndReplaceFiles(obj, downloadQueue) {
             const urlObj = new URL(url);
             const filename = path.basename(urlObj.pathname);
             const localPath = path.join('media', filename);
+            const previous = mediaSources.get(localPath);
+            if (previous && previous !== url) {
+              console.warn(
+                `Media filename collision: ${previous} and ${url} both map to ${localPath}; keeping the first`,
+              );
+            } else {
+              mediaSources.set(localPath, url);
+              downloadQueue.push({ url, localPath });
+            }
             fileObj.file = `/data/${localPath}`;
-            downloadQueue.push({ url, localPath });
           }
         });
       } else {
